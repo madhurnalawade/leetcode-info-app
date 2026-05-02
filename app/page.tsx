@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 type Skill = {
@@ -76,6 +77,16 @@ export default function Home() {
   const [error, setError] = useState("");
   const [stats, setStats] = useState<LeetCodeStats | null>(null);
 
+  async function fetchStats(inputUsername: string): Promise<LeetCodeStats & { message?: string }> {
+    const response = await fetch(`/api/leetcode/${encodeURIComponent(inputUsername)}`);
+    const payload = (await response.json()) as LeetCodeStats & { message?: string };
+    if (!response.ok) {
+      throw new Error(payload.message ?? "Unable to fetch LeetCode profile.");
+    }
+
+    return payload;
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -89,18 +100,16 @@ export default function Home() {
     setLoading(true);
     setError("");
 
-    const response = await fetch(`/api/leetcode/${encodeURIComponent(trimmedUsername)}`);
-    const payload = (await response.json()) as LeetCodeStats & { message?: string };
-
-    if (!response.ok) {
+    try {
+      const payload = await fetchStats(trimmedUsername);
+      setStats(payload);
+    } catch (fetchError) {
+      const message = fetchError instanceof Error ? fetchError.message : "Unable to fetch LeetCode profile.";
       setStats(null);
-      setError(payload.message ?? "Unable to fetch LeetCode profile.");
+      setError(message);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setStats(payload);
-    setLoading(false);
   }
 
   return (
@@ -126,12 +135,60 @@ export default function Home() {
           >
             {loading ? "Loading..." : "Get Stats"}
           </button>
+          {stats ? (
+            <Link
+              href={`/compare?user1=${encodeURIComponent(stats.username)}`}
+              className="inline-flex h-11 items-center justify-center rounded-lg bg-zinc-800 px-4 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-zinc-300"
+            >
+              Compare
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="h-11 rounded-lg bg-zinc-800 px-4 text-sm font-medium text-white opacity-70 dark:bg-zinc-200 dark:text-zinc-900"
+            >
+              Compare
+            </button>
+          )}
         </form>
 
         {error ? (
           <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
         ) : null}
       </section>
+
+      {stats ? (
+        <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+          <h2 className="text-lg font-semibold">Solved Progress</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <CircleProgress
+              label="Total"
+              solved={stats.totalSolved}
+              total={stats.totalQuestions}
+              colorClassName="stroke-indigo-500"
+            />
+            <CircleProgress
+              label="Easy"
+              solved={stats.easySolved}
+              total={stats.easyTotal}
+              colorClassName="stroke-emerald-500"
+            />
+            <CircleProgress
+              label="Medium"
+              solved={stats.mediumSolved}
+              total={stats.mediumTotal}
+              colorClassName="stroke-amber-500"
+            />
+            <CircleProgress
+              label="Hard"
+              solved={stats.hardSolved}
+              total={stats.hardTotal}
+              colorClassName="stroke-rose-500"
+            />
+          </div>
+        </section>
+      ) : null}
 
       {stats ? (
         <section className="grid gap-6 md:grid-cols-2">
@@ -187,38 +244,6 @@ export default function Home() {
                 ))}
               </ul>
             )}
-          </div>
-        </section>
-      ) : null}
-
-      {stats ? (
-        <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-          <h2 className="text-lg font-semibold">Solved Progress</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <CircleProgress
-              label="Total"
-              solved={stats.totalSolved}
-              total={stats.totalQuestions}
-              colorClassName="stroke-indigo-500"
-            />
-            <CircleProgress
-              label="Easy"
-              solved={stats.easySolved}
-              total={stats.easyTotal}
-              colorClassName="stroke-emerald-500"
-            />
-            <CircleProgress
-              label="Medium"
-              solved={stats.mediumSolved}
-              total={stats.mediumTotal}
-              colorClassName="stroke-amber-500"
-            />
-            <CircleProgress
-              label="Hard"
-              solved={stats.hardSolved}
-              total={stats.hardTotal}
-              colorClassName="stroke-rose-500"
-            />
           </div>
         </section>
       ) : null}
