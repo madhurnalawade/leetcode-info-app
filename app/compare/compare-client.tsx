@@ -5,6 +5,7 @@ import { FormEvent, useMemo, useState } from "react";
 
 type Skill = {
   tagName: string;
+  tagSlug: string;
   problemsSolved: number;
 };
 
