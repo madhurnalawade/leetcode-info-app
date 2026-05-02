@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import RecommendationsModal from "./components/RecommendationsModal";
 
 type Skill = {
   tagName: string;
+  tagSlug: string;
   problemsSolved: number;
 };
 
@@ -76,6 +78,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [stats, setStats] = useState<LeetCodeStats | null>(null);
+  const [isReviseOpen, setIsReviseOpen] = useState(false);
 
   async function fetchStats(inputUsername: string): Promise<LeetCodeStats & { message?: string }> {
     const response = await fetch(`/api/leetcode/${encodeURIComponent(inputUsername)}`);
@@ -157,6 +160,17 @@ export default function Home() {
           <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
         ) : null}
       </section>
+
+      {stats && stats.skills.length > 0 ? (
+        <section className="flex gap-3 sm:flex-row">
+          <button
+            onClick={() => setIsReviseOpen(true)}
+            className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+          >
+            Revise
+          </button>
+        </section>
+      ) : null}
 
       {stats ? (
         <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
@@ -246,6 +260,14 @@ export default function Home() {
             )}
           </div>
         </section>
+      ) : null}
+
+      {isReviseOpen && stats ? (
+        <RecommendationsModal
+          username={stats.username}
+          skills={stats.skills}
+          onClose={() => setIsReviseOpen(false)}
+        />
       ) : null}
     </main>
   );

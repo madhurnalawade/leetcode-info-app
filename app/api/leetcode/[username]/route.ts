@@ -22,14 +22,17 @@ const profileQuery = `
       tagProblemCounts {
         advanced {
           tagName
+          tagSlug
           problemsSolved
         }
         intermediate {
           tagName
+          tagSlug
           problemsSolved
         }
         fundamental {
           tagName
+          tagSlug
           problemsSolved
         }
       }
@@ -44,6 +47,7 @@ type DifficultyStat = {
 
 type SkillStat = {
   tagName: string;
+  tagSlug: string;
   problemsSolved: number;
 };
 
