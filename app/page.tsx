@@ -14,8 +14,61 @@ type LeetCodeStats = {
   easySolved: number;
   mediumSolved: number;
   hardSolved: number;
+  totalQuestions: number;
+  easyTotal: number;
+  mediumTotal: number;
+  hardTotal: number;
   skills: Skill[];
 };
+
+function CircleProgress({
+  label,
+  solved,
+  total,
+  colorClassName,
+}: {
+  label: string;
+  solved: number;
+  total: number;
+  colorClassName: string;
+}) {
+  const size = 120;
+  const strokeWidth = 10;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const progress = total > 0 ? Math.min(solved / total, 1) : 0;
+  const offset = circumference * (1 - progress);
+
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-xl bg-zinc-100 p-4 dark:bg-zinc-900">
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          strokeWidth={strokeWidth}
+          className="stroke-zinc-300 dark:stroke-zinc-700"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className={colorClassName}
+        />
+      </svg>
+      <p className="text-sm font-medium">{label}</p>
+      <p className="text-xs text-zinc-600 dark:text-zinc-400">
+        {solved} / {total}
+      </p>
+    </div>
+  );
+}
 
 export default function Home() {
   const [username, setUsername] = useState("");
@@ -95,19 +148,27 @@ export default function Home() {
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-zinc-600 dark:text-zinc-400">Solved (Total)</dt>
-                <dd className="font-medium">{stats.totalSolved}</dd>
+                <dd className="font-medium">
+                  {stats.totalSolved} / {stats.totalQuestions}
+                </dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-zinc-600 dark:text-zinc-400">Solved (Easy)</dt>
-                <dd className="font-medium text-emerald-600 dark:text-emerald-400">{stats.easySolved}</dd>
+                <dd className="font-medium text-emerald-600 dark:text-emerald-400">
+                  {stats.easySolved} / {stats.easyTotal}
+                </dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-zinc-600 dark:text-zinc-400">Solved (Medium)</dt>
-                <dd className="font-medium text-amber-600 dark:text-amber-400">{stats.mediumSolved}</dd>
+                <dd className="font-medium text-amber-600 dark:text-amber-400">
+                  {stats.mediumSolved} / {stats.mediumTotal}
+                </dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-zinc-600 dark:text-zinc-400">Solved (Hard)</dt>
-                <dd className="font-medium text-rose-600 dark:text-rose-400">{stats.hardSolved}</dd>
+                <dd className="font-medium text-rose-600 dark:text-rose-400">
+                  {stats.hardSolved} / {stats.hardTotal}
+                </dd>
               </div>
             </dl>
           </div>
@@ -126,6 +187,38 @@ export default function Home() {
                 ))}
               </ul>
             )}
+          </div>
+        </section>
+      ) : null}
+
+      {stats ? (
+        <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+          <h2 className="text-lg font-semibold">Solved Progress</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <CircleProgress
+              label="Total"
+              solved={stats.totalSolved}
+              total={stats.totalQuestions}
+              colorClassName="stroke-indigo-500"
+            />
+            <CircleProgress
+              label="Easy"
+              solved={stats.easySolved}
+              total={stats.easyTotal}
+              colorClassName="stroke-emerald-500"
+            />
+            <CircleProgress
+              label="Medium"
+              solved={stats.mediumSolved}
+              total={stats.mediumTotal}
+              colorClassName="stroke-amber-500"
+            />
+            <CircleProgress
+              label="Hard"
+              solved={stats.hardSolved}
+              total={stats.hardTotal}
+              colorClassName="stroke-rose-500"
+            />
           </div>
         </section>
       ) : null}
