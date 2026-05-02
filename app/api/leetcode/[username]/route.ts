@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  getRequesterIp,
+  recordValidLeetCodeUsername,
+} from "@/app/lib/supabase-usernames";
 
 const LEETCODE_GRAPHQL_ENDPOINT = "https://leetcode.com/graphql";
 
@@ -94,7 +98,7 @@ function getTopSkills(tagProblemCounts: {
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ username: string }> },
 ) {
   const { username } = await context.params;
@@ -155,6 +159,15 @@ export async function GET(
   const totalQuestions = getSolvedCount(allQuestionsCount, "All");
 
   const skills = getTopSkills(user.tagProblemCounts ?? {});
+
+  try {
+    await recordValidLeetCodeUsername({
+      ipAddress: getRequesterIp(request),
+      username: user.username,
+    });
+  } catch (recordError) {
+    console.error(recordError);
+  }
 
   return NextResponse.json(
     {

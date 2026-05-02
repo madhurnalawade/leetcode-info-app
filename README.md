@@ -2,6 +2,22 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Supabase username history
+
+The profile API can store each requester's IP address with the list of valid
+LeetCode usernames they have entered.
+
+1. Run `supabase/leetcode_username_history.sql` in your Supabase SQL editor.
+2. Add these server-only environment variables:
+
+```bash
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+The service-role key must stay server-side. Do not expose it with a
+`NEXT_PUBLIC_` prefix.
+
 First, run the development server:
 
 ```bash
