@@ -4,6 +4,10 @@ const LEETCODE_GRAPHQL_ENDPOINT = "https://leetcode.com/graphql";
 
 const profileQuery = `
   query userProfile($username: String!) {
+    allQuestionsCount {
+      difficulty
+      count
+    }
     matchedUser(username: $username) {
       username
       profile {
@@ -45,6 +49,7 @@ type SkillStat = {
 
 type GraphQlResponse = {
   data?: {
+    allQuestionsCount?: DifficultyStat[];
     matchedUser?: {
       username: string;
       profile?: {
@@ -139,6 +144,11 @@ export async function GET(
   const mediumSolved = getSolvedCount(difficultyStats, "Medium");
   const hardSolved = getSolvedCount(difficultyStats, "Hard");
   const totalSolved = getSolvedCount(difficultyStats, "All");
+  const allQuestionsCount = payload.data?.allQuestionsCount;
+  const easyTotal = getSolvedCount(allQuestionsCount, "Easy");
+  const mediumTotal = getSolvedCount(allQuestionsCount, "Medium");
+  const hardTotal = getSolvedCount(allQuestionsCount, "Hard");
+  const totalQuestions = getSolvedCount(allQuestionsCount, "All");
 
   const skills = getTopSkills(user.tagProblemCounts ?? {});
 
@@ -150,6 +160,10 @@ export async function GET(
       easySolved,
       mediumSolved,
       hardSolved,
+      totalQuestions,
+      easyTotal,
+      mediumTotal,
+      hardTotal,
       skills,
     },
     {
